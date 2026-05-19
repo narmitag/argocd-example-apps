@@ -1,31 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: matrix
-  namespace: argocd
+  name: services
+  namespace: team-platform
 spec:
   generators:
-    - matrix:
-        generators:
-          - list:
-              elements:
-                - env: dev
-                - env: prod
-          - list:
-              elements:
-                - region: us
+    - list:
+        elements:
+          - service: api
+          - service: worker
   template:
     metadata:
-      name: 'appset-matrix-{{env}}-{{region}}'
+      name: '{{service}}'
+      # Generated Applications will be in team-platform namespace (same as ApplicationSet)
     spec:
-      project: default
+      project: team-platform
       source:
         repoURL: https://github.com/argoproj/argocd-example-apps
         targetRevision: HEAD
-        path: lightweight/app-a
+        path: lightweight/app-b
       destination:
         server: https://kubernetes.default.svc
-        namespace: 'appset-matrix-{{env}}-{{region}}'
+        namespace: 'team-platform-{{service}}'
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
